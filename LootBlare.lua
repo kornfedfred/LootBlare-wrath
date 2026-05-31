@@ -68,7 +68,7 @@ local state = {
     masterLooter  = nil,
     mlRollDuration = 15,
     rollDuration  = 15,
-    rollCap       = { sr = 101, ms = 100, os = 99, tm = 50 },
+    rollCap       = { sr = 100, ms = 100, os = 99, tm = 50 },
 }
 
 local discoverTooltip = CreateFrame("GameTooltip", "LootBlareTooltip", UIParent, "GameTooltipTemplate")
@@ -495,7 +495,7 @@ local function SendRollCaps()
     if PlayerIsML() then
         local chan = GetNumRaidMembers() > 0 and "RAID" or "PARTY"
         local payload = PREFIX_SET_ROLL_CAPS
-            .. "sr=" .. (RollCap and RollCap.sr or 101)
+            .. "sr=" .. (RollCap and RollCap.sr or 100)
             .. ",ms=" .. (RollCap and RollCap.ms or 100)
             .. ",os=" .. (RollCap and RollCap.os or 99)
             .. ",tm=" .. (RollCap and RollCap.tm or 50)
@@ -753,7 +753,7 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
     -- Initialize saved variables
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose     == nil then FrameAutoClose     = true end
-    if RollCap            == nil then RollCap = { sr = 101, ms = 100, os = 99, tm = 50 } end
+    if RollCap            == nil then RollCap = { sr = 100, ms = 100, os = 99, tm = 50 } end
     if MLRollCap          == nil then MLRollCap = {} end
     if LootBlareMinimap   == nil then LootBlareMinimap = {} end
 
@@ -932,7 +932,7 @@ SlashCmdList["LOOTBLARE"] = function(msg)
     end
     if msg == "settings" then
         Print("Duration: " .. (FrameShownDuration or 15) .. "s | Auto-close: " .. ((FrameAutoClose ~= false) and "on" or "off"))
-        Print("SR roll cap: " .. (RollCap and RollCap.sr or 101))
+        Print("SR roll cap: " .. (RollCap and RollCap.sr or 100))
         Print("MS roll cap: " .. (RollCap and RollCap.ms or 100))
         Print("OS roll cap: " .. (RollCap and RollCap.os or 99))
         Print("TM roll cap: " .. (RollCap and RollCap.tm or 50))

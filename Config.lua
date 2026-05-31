@@ -142,8 +142,8 @@ panel.okay = function()
     FrameShownDuration = math.floor(durationSlider:GetValue() + 0.5)
     FrameAutoClose = autoCloseCheck:GetChecked() and true or false
 
-    if not RollCap then RollCap = { sr = 101, ms = 100, os = 99, tm = 50 } end
-    RollCap.sr = tonumber(srEdit:GetText()) or RollCap.sr or 101
+    if not RollCap then RollCap = { sr = 100, ms = 100, os = 99, tm = 50 } end
+    RollCap.sr = tonumber(srEdit:GetText()) or RollCap.sr or 100
     RollCap.ms = tonumber(msEdit:GetText()) or RollCap.ms or 100
     RollCap.os = tonumber(osEdit:GetText()) or RollCap.os or 99
     RollCap.tm = tonumber(tmEdit:GetText()) or RollCap.tm or 50
@@ -159,7 +159,7 @@ end
 panel.default = function()
     FrameShownDuration = 15
     FrameAutoClose = true
-    RollCap = { sr = 101, ms = 100, os = 99, tm = 50 }
+    RollCap = { sr = 100, ms = 100, os = 99, tm = 50 }
     if addon.SyncSettings then addon.SyncSettings() end
     panel.refresh()
 end
@@ -170,8 +170,8 @@ panel.refresh = function()
     autoCloseCheck:SetChecked(FrameAutoClose ~= false)
 
     -- Saved (user) caps
-    local rc = RollCap or { sr = 101, ms = 100, os = 99, tm = 50 }
-    srEdit:SetText(rc.sr or 101)
+    local rc = RollCap or { sr = 100, ms = 100, os = 99, tm = 50 }
+    srEdit:SetText(rc.sr or 100)
     msEdit:SetText(rc.ms or 100)
     osEdit:SetText(rc.os or 99)
     tmEdit:SetText(rc.tm or 50)
@@ -183,7 +183,7 @@ panel.refresh = function()
             if saved == live then return tostring(live) end
             return "|cFFFFFF00" .. tostring(live) .. "|r"
         end
-        srRow.activeText:SetText(capStr(rc.sr or 101, active.sr or rc.sr or 101))
+        srRow.activeText:SetText(capStr(rc.sr or 100, active.sr or rc.sr or 100))
         msRow.activeText:SetText(capStr(rc.ms or 100, active.ms or rc.ms or 100))
         osRow.activeText:SetText(capStr(rc.os or 99,  active.os or rc.os or 99))
         tmRow.activeText:SetText(capStr(rc.tm or 50,  active.tm or rc.tm or 50))
