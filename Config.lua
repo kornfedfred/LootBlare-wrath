@@ -177,10 +177,15 @@ panel.refresh = function()
 
     -- Saved (user) caps
     local rc = RollCap or { sr = 100, ms = 100, os = 99, tm = 50 }
-    srEdit:SetText(tostring(rc.sr or 100))
-    msEdit:SetText(tostring(rc.ms or 100))
-    osEdit:SetText(tostring(rc.os or 99))
-    tmEdit:SetText(tostring(rc.tm or 50))
+    local function setCap(box, value)
+        box:SetText(tostring(value))
+        box:SetCursorPosition(0)  -- show from start, not scrolled to end
+        box:ClearFocus()
+    end
+    setCap(srEdit, rc.sr or 100)
+    setCap(msEdit, rc.ms or 100)
+    setCap(osEdit, rc.os or 99)
+    setCap(tmEdit, rc.tm or 50)
 
     -- Active (runtime) caps from ML overrides or RollFor sync
     local active = addon.GetActiveRollCaps and addon.GetActiveRollCaps() or nil
