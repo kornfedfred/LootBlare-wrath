@@ -228,6 +228,11 @@ function addon.GetItemIntent(itemLink)
     return entry and entry.intent or nil
 end
 
+function addon.IsItemAutoRolled(itemLink)
+    local entry = FindItemByLink(itemLink)
+    return entry and entry.autoRolled or false
+end
+
 function addon.SetItemAutoRolled(itemLink)
     local entry = FindItemByLink(itemLink)
     if entry then

@@ -619,7 +619,7 @@ local function TryStartRoll(message)
         ShowRollFrame(itemRollFrame, state.mlRollDuration, links[1])
 
         -- AUTO-ROLL from chat path (covers ML who doesn't receive own AceComm)
-        if addon.GetItemIntent then
+        if addon.GetItemIntent and not (addon.IsItemAutoRolled and addon.IsItemAutoRolled(links[1])) then
             local intent = addon.GetItemIntent(links[1])
             if intent then
                 local cap
@@ -816,7 +816,7 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
             ShowRollFrame(itemRollFrame, duration, payload.link)
 
             -- AUTO-ROLL: if the player pre-selected an intent for this item, roll immediately
-            if addon.GetItemIntent then
+            if addon.GetItemIntent and not (addon.IsItemAutoRolled and addon.IsItemAutoRolled(payload.link)) then
                 local intent = addon.GetItemIntent(payload.link)
                 if intent then
                     local cap
