@@ -174,9 +174,10 @@ if addon.RegisterRFCallback then
                 local names = {}
                 local me = UnitName("player")
                 for _, roll in ipairs(payload.rolls) do
-                    if roll.player_name then
-                        table.insert(names, roll.player_name)
-                        if me and roll.player_name == me then
+                    local rname = roll.name or roll.player_name  -- RollingPlayer uses .name; RF_ROLL uses .player_name
+                    if rname then
+                        table.insert(names, rname)
+                        if me and rname == me then
                             entry.playerSR = true
                             entry.intent = "sr"  -- auto-select SR intent
                         end
