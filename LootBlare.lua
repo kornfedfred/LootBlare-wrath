@@ -599,7 +599,8 @@ local function TryStartRoll(message)
             local intent = addon.GetItemIntent(links[1])
             if intent then
                 local cap
-                if     intent == "sr" then cap = state.rollCap.sr
+                -- RollFor uses the MS threshold for SR rolls (just /roll)
+                if     intent == "sr" then cap = state.rollCap.ms
                 elseif intent == "ms" then cap = state.rollCap.ms
                 elseif intent == "os" then cap = state.rollCap.os
                 elseif intent == "tm" then cap = state.rollCap.tm
@@ -785,7 +786,8 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
                 local intent = addon.GetItemIntent(payload.link)
                 if intent then
                     local cap
-                    if     intent == "sr" then cap = state.rollCap.sr
+                    -- RollFor uses the MS threshold for SR rolls (just /roll)
+                    if     intent == "sr" then cap = state.rollCap.ms
                     elseif intent == "ms" then cap = state.rollCap.ms
                     elseif intent == "os" then cap = state.rollCap.os
                     elseif intent == "tm" then cap = state.rollCap.tm
