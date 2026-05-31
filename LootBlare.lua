@@ -634,6 +634,30 @@ local function HandleGroupChat(self, message)
     end
     if string.find(message, "^Roll for ") then
         TryStartRoll(message)
+        return
+    end
+    -- Sync timer from RollFor's countdown messages
+    if state.isRolling then
+        local stopIn = string.match(message, "^Stopping rolls in (%d+)")
+        if stopIn then
+            local left = tonumber(stopIn)
+            if left then
+                -- Derive actual roll duration from elapsed + remaining
+                local actualDuration = state.timeElapsed + left
+                if actualDuration > 0 then
+                    state.rollDuration = actualDuration
+                end
+                state.timeElapsed = state.rollDuration - left
+            end
+            return
+        end
+        -- Single digit countdown: "2", "1"
+        if string.match(message, "^%d$") then
+            local left = tonumber(message)
+            if left and left <= 3 then
+                state.timeElapsed = state.rollDuration - left
+            end
+        end
     end
 end
 
