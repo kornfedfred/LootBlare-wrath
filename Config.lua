@@ -104,7 +104,7 @@ local function CreateCapRow(anchorTo, labelText, name)
     edit:SetTextInsets(6, 6, 0, 0)
     edit:SetAutoFocus(false)
     edit:SetNumeric(true)
-    edit:SetMaxLetters(4)
+    edit:SetMaxLetters(3)  -- caps are 1–999
     edit:SetScript("OnEditFocusGained", function(self) self:SetBackdropColor(0.1, 0.1, 0.1, 0.8) end)
     edit:SetScript("OnEditFocusLost",   function(self) self:SetBackdropColor(0, 0, 0, 0.5) end)
     edit:SetScript("OnEnterPressed",    function(self) self:ClearFocus() end)
@@ -143,10 +143,16 @@ panel.okay = function()
     FrameAutoClose = autoCloseCheck:GetChecked() and true or false
 
     if not RollCap then RollCap = { sr = 100, ms = 100, os = 99, tm = 50 } end
-    RollCap.sr = tonumber(srEdit:GetText()) or RollCap.sr or 100
-    RollCap.ms = tonumber(msEdit:GetText()) or RollCap.ms or 100
-    RollCap.os = tonumber(osEdit:GetText()) or RollCap.os or 99
-    RollCap.tm = tonumber(tmEdit:GetText()) or RollCap.tm or 50
+    -- Clamp to a sane range; reject empty/invalid entries by keeping the old value
+    local function readCap(box, fallback)
+        local v = tonumber(box:GetText())
+        if not v or v < 1 or v > 999 then return fallback end
+        return v
+    end
+    RollCap.sr = readCap(srEdit, RollCap.sr or 100)
+    RollCap.ms = readCap(msEdit, RollCap.ms or 100)
+    RollCap.os = readCap(osEdit, RollCap.os or 99)
+    RollCap.tm = readCap(tmEdit, RollCap.tm or 50)
 
     -- Sync runtime state and broadcast if ML
     if addon.SyncSettings then addon.SyncSettings() end

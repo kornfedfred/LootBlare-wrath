@@ -713,7 +713,7 @@ function eventHandlers.CHAT_MSG_ADDON(self, prefix, message)
         local changed = false
         for k, v in string.gmatch(message, "(%a+)=(%d+)") do
             v = tonumber(v)
-            if state.rollCap[k] then
+            if state.rollCap[k] and v and v >= 1 and v <= 999 then
                 state.rollCap[k] = v
                 if MLRollCap and MLRollCap[k] ~= v then
                     MLRollCap[k] = v
@@ -770,6 +770,14 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
     if RollCap            == nil then RollCap = { sr = 100, ms = 100, os = 99, tm = 50 } end
     -- Migrate: old SR default was 101, RollFor uses 100 (same as MS)
     if RollCap.sr == 101 then RollCap.sr = 100 end
+    -- Sanitize: clamp any corrupt/out-of-range caps to defaults
+    local capDefaults = { sr = 100, ms = 100, os = 99, tm = 50 }
+    for k, def in pairs(capDefaults) do
+        local v = RollCap[k]
+        if type(v) ~= "number" or v < 1 or v > 999 then
+            RollCap[k] = def
+        end
+    end
     if MLRollCap          == nil then MLRollCap = {} end
     if LootBlareMinimap   == nil then LootBlareMinimap = {} end
 
@@ -979,7 +987,10 @@ SlashCmdList["LOOTBLARE"] = function(msg)
             if string.find(msg, k) then
                 local _, _, newRollCap = string.find(msg, k .. " (%d+)")
                 newRollCap = tonumber(newRollCap)
-                if not newRollCap or newRollCap < 0 then return end
+                if not newRollCap or newRollCap < 1 or newRollCap > 999 then
+                    Print("Roll cap must be between 1 and 999.")
+                    return
+                end
                 RollCap[k] = newRollCap
                 state.rollCap[k] = newRollCap
                 wipe(formatCache)
