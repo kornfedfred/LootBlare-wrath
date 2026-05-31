@@ -1,0 +1,32 @@
+## Interface: 30300
+## X-Min-Interface: 30300
+
+## Title: LootBlare-wrath
+## Notes: Displays sorted item rolls in a draggable frame for streamlined master looting.
+
+## Author: Ehawne, Sivent, Gulolio, Nikki1993, kff
+## Version: 2.0.0
+## X-Website: https://github.com/kornfedfred/LootBlare-wrath/
+## X-Category: Raid
+## X-License: MIT
+
+## SavedVariables: FrameShownDuration, FrameAutoClose, RollCap, MLRollCap, LootBlareMinimap
+## DefaultState: enabled
+
+# Libraries — base
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+# Libraries — RollFor sync
+Libs\AceComm-3.0\ChatThrottleLib.lua
+Libs\AceComm-3.0\AceComm-3.0.lua
+Libs\LibDeflate\LibDeflate.lua
+Libs\LibSerialize\LibSerialize.lua
+
+# Core
+LootBlare.lua
+RollForSync.lua
+LootPreview.lua
+Config.lua
