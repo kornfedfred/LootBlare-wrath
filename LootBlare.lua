@@ -504,6 +504,16 @@ local function SendRollCaps()
 end
 
 -- Exported: sync runtime state from SavedVariables (called by Config.lua)
+-- Exported: let Config.lua read the runtime roll caps (includes ML overrides)
+function addon.GetActiveRollCaps()
+    return {
+        sr = state.rollCap.sr,
+        ms = state.rollCap.ms,
+        os = state.rollCap.os,
+        tm = state.rollCap.tm,
+    }
+end
+
 function addon.SyncSettings()
     if RollCap then
         for k, _ in pairs(state.rollCap) do
