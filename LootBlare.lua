@@ -647,7 +647,10 @@ function eventHandlers.CHAT_MSG_RAID_WARNING(self, message)
         addon.HandleLootPreviewChat(message)
         UpdateFrameLayout()
     end
-    TryStartRoll(message)
+    -- Guard: only start rolls from actual roll announcements (matches HandleGroupChat)
+    if string.find(message, "^Roll for ") then
+        TryStartRoll(message)
+    end
 end
 
 -- Support RollFor / party-based roll announcements
@@ -865,9 +868,10 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
             end
         end)
 
-        -- RF_FINISH: roll is done (let the existing timer handle display)
+        -- RF_FINISH: roll is done — stop re-showing frame on every chat message
         addon.RegisterRFCallback("RF_FINISH", function()
-            -- no-op — the OnUpdate timer handles frame lifetime
+            state.isRolling = false
+            ResetRolls()
         end)
 
         -- RF_CANCEL: roll was canceled by ML
