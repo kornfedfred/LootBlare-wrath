@@ -158,14 +158,20 @@ local function SortRolls()
 end
 
 local function FormatRollMessage(msg)
-    local cacheKey = msg.roller .. ":" .. msg.roll .. ":" .. msg.minRoll .. ":" .. msg.maxRoll
+    local cacheKey = msg.roller .. ":" .. msg.roll .. ":" .. msg.minRoll .. ":" .. msg.maxRoll .. ":" .. (msg.rollType or "")
     if formatCache[cacheKey] then return formatCache[cacheKey] end
 
     local classUpper = msg.class and msg.class:upper() or ""
     local classColor = RAID_CLASS_COLORS[classUpper] or "FFFFFFFF"
 
     local textColor
-    if msg.maxRoll > state.rollCap.ms then     textColor = COLORS.SR
+    if msg.rollType then
+        if     msg.rollType == "SoftRes"  then textColor = COLORS.SR
+        elseif msg.rollType == "MainSpec" then textColor = COLORS.MS
+        elseif msg.rollType == "OffSpec"  then textColor = COLORS.OS
+        elseif msg.rollType == "Transmog" then textColor = COLORS.TM
+        else                                   textColor = COLORS.DEFAULT end
+    elseif msg.maxRoll > state.rollCap.ms then  textColor = COLORS.SR
     elseif msg.maxRoll == state.rollCap.ms then textColor = COLORS.MS
     elseif msg.maxRoll == state.rollCap.os then textColor = COLORS.OS
     elseif msg.maxRoll <= state.rollCap.tm then textColor = COLORS.TM
@@ -174,7 +180,15 @@ local function FormatRollMessage(msg)
     local c_class = format("|c%s%-12s|r", classColor, msg.roller)
     local c_end
     if msg.minRoll == 1 then
-        if     msg.maxRoll == state.rollCap.sr then c_end = " SR"
+        -- Prefer RollFor's authoritative roll type; fall back to value-based
+        -- labeling for standalone use (no RollFor sync).
+        if msg.rollType then
+            if     msg.rollType == "SoftRes"  then c_end = " SR"
+            elseif msg.rollType == "MainSpec" then c_end = " MS"
+            elseif msg.rollType == "OffSpec"  then c_end = " OS"
+            elseif msg.rollType == "Transmog" then c_end = " TM"
+            else   c_end = format("(%d)", msg.maxRoll) end
+        elseif msg.maxRoll == state.rollCap.sr and state.rollCap.sr ~= state.rollCap.ms then c_end = " SR"
         elseif msg.maxRoll == state.rollCap.ms then c_end = " MS"
         elseif msg.maxRoll == state.rollCap.os then c_end = " OS"
         elseif msg.maxRoll == state.rollCap.tm then c_end = " TM"
@@ -826,11 +840,12 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
             elseif payload.roll_type == "Transmog"  then maxRoll = state.rollCap.tm
             else                                         maxRoll = state.rollCap.ms end
             tinsert(state.rollMessages, {
-                roller  = payload.player_name,
-                roll    = payload.roll,
-                minRoll = 1,
-                maxRoll = maxRoll,
-                class   = payload.player_class or GetClassOfRoller(payload.player_name),
+                roller   = payload.player_name,
+                roll     = payload.roll,
+                minRoll  = 1,
+                maxRoll  = maxRoll,
+                rollType = payload.roll_type,  -- authoritative type from RollFor
+                class    = payload.player_class or GetClassOfRoller(payload.player_name),
             })
             UpdateTextArea(itemRollFrame.rollPanel)
         end)
