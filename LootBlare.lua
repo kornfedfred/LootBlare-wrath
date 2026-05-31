@@ -754,6 +754,8 @@ function eventHandlers.ADDON_LOADED(self, loadedAddon)
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose     == nil then FrameAutoClose     = true end
     if RollCap            == nil then RollCap = { sr = 100, ms = 100, os = 99, tm = 50 } end
+    -- Migrate: old SR default was 101, RollFor uses 100 (same as MS)
+    if RollCap.sr == 101 then RollCap.sr = 100 end
     if MLRollCap          == nil then MLRollCap = {} end
     if LootBlareMinimap   == nil then LootBlareMinimap = {} end
 
