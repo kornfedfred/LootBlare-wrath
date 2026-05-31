@@ -90,6 +90,35 @@ local function IsDropHeader(message)
     return false
 end
 
+-- Parse follow-up SR/no-SR announcements: "[Item] has no Soft-Res." or "[Item] is soft-ressed by X"
+local function ParseSRStatus(message)
+    -- "[Item] has no Soft-Res."
+    local noSrLink = string.match(message, "(|c%x+|Hitem:.-%|h%[.-%]|h|r) has no Soft%-Res")
+    if noSrLink then
+        local entry = FindItemByLink(noSrLink)
+        if entry and not entry.sr then
+            entry.noSr = true
+        end
+        return true
+    end
+    -- "[Item] is soft-ressed by PlayerA, PlayerB" (sometimes without color codes)
+    local srLink, srNames = string.match(message, "(|c%x+|Hitem:.-%|h%[.-%]|h|r) is soft%-ressed by (.+)")
+    if srLink and srNames then
+        local entry = FindItemByLink(srLink)
+        if entry then
+            entry.sr = StripColorCodes(srNames)
+            -- Check if current player is among the SR names
+            local me = UnitName("player")
+            if me and string.find(entry.sr, me, 1, true) then
+                entry.playerSR = true
+                entry.intent = "sr"  -- auto-select SR intent
+            end
+        end
+        return true
+    end
+    return false
+end
+
 function addon.HandleLootPreviewChat(message)
     if IsDropHeader(message) then
         wipe(preview.items)
@@ -104,9 +133,25 @@ function addon.HandleLootPreviewChat(message)
     if collecting then
         local entry = ParseItemLine(message)
         if entry then
+            -- Check if current player is in the SR annotation
+            if entry.sr then
+                local me = UnitName("player")
+                if me and string.find(entry.sr, me, 1, true) then
+                    entry.playerSR = true
+                    entry.intent = "sr"  -- auto-select SR intent
+                end
+            end
             table.insert(preview.items, entry)
             collectTimer = 3
             if timerFrame then timerFrame:Show() end
+            if addon.RefreshLootPreview then addon.RefreshLootPreview() end
+            return true
+        end
+    end
+
+    -- SR status messages can arrive after the item list
+    if #preview.items > 0 then
+        if ParseSRStatus(message) then
             if addon.RefreshLootPreview then addon.RefreshLootPreview() end
             return true
         end
@@ -124,6 +169,23 @@ if addon.RegisterRFCallback then
         local entry = FindItemByLink(payload.link)
         if entry then
             entry.status = "rolling"
+            -- Extract SR info from AceComm payload
+            if payload.strategy == "SoftResRoll" and payload.rolls then
+                local names = {}
+                local me = UnitName("player")
+                for _, roll in ipairs(payload.rolls) do
+                    if roll.player_name then
+                        table.insert(names, roll.player_name)
+                        if me and roll.player_name == me then
+                            entry.playerSR = true
+                            entry.intent = "sr"  -- auto-select SR intent
+                        end
+                    end
+                end
+                if #names > 0 and not entry.sr then
+                    entry.sr = table.concat(names, ", ")
+                end
+            end
             if addon.RefreshLootPreview then addon.RefreshLootPreview() end
         end
     end)
@@ -376,19 +438,16 @@ function addon.RefreshLootPreview()
             row.nameText:SetText(displayName)
             row.nameText:SetTextColor(r, g, b)
 
-            -- Rolling highlight
-            if entry.status == "rolling" then
-                row.rollBg:SetVertexColor(0.0, 0.4, 0.0, 0.35)
-            else
-                row.rollBg:SetVertexColor(0.0, 0.0, 0.0, 0.0)
-            end
-
             -- Status text (top-right)
             if entry.hr then
                 row.statusText:SetText("HR")
                 row.statusText:SetTextColor(0.8, 0.2, 0.2)
             elseif entry.status == "rolling" then
-                row.statusText:SetText("ROLLING")
+                if entry.sr then
+                    row.statusText:SetText("SR ROLL")
+                else
+                    row.statusText:SetText("ROLLING")
+                end
                 row.statusText:SetTextColor(0.0, 1.0, 0.0)
             elseif entry.status == "won" and entry.winner then
                 row.statusText:SetText(entry.winner)
@@ -396,11 +455,27 @@ function addon.RefreshLootPreview()
             elseif entry.status == "canceled" then
                 row.statusText:SetText("X")
                 row.statusText:SetTextColor(0.8, 0.2, 0.2)
+            elseif entry.playerSR then
+                -- Current player has this item SR'd — prominent highlight
+                row.statusText:SetText("YOUR SR")
+                row.statusText:SetTextColor(0.9, 0.19, 0.18)
             elseif entry.sr then
                 row.statusText:SetText("SR: " .. entry.sr)
                 row.statusText:SetTextColor(0.9, 0.5, 0.2)
+            elseif entry.noSr then
+                row.statusText:SetText("No SR")
+                row.statusText:SetTextColor(0.5, 0.5, 0.5)
             else
                 row.statusText:SetText("")
+            end
+
+            -- Rolling highlight — brighter for player's own SR
+            if entry.status == "rolling" and entry.playerSR then
+                row.rollBg:SetVertexColor(0.4, 0.1, 0.0, 0.4)
+            elseif entry.status == "rolling" then
+                row.rollBg:SetVertexColor(0.0, 0.4, 0.0, 0.35)
+            else
+                row.rollBg:SetVertexColor(0.0, 0.0, 0.0, 0.0)
             end
 
             -- Intent buttons
