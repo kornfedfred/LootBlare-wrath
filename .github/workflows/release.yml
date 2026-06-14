@@ -36,13 +36,7 @@ jobs:
           fi
 
       - name: Build zip
-        run: |
-          mkdir -p LootBlare-wrath
-          rsync -av --exclude='.git' --exclude='.github' --exclude='.gitignore' \
-            --exclude='.gitattributes' --exclude='.pkgmeta' --exclude='test' \
-            --exclude='test.sh' --exclude='docs' --exclude='dev' \
-            --exclude='LootBlare-wrath' . LootBlare-wrath/
-          zip -r LootBlare-wrath.zip LootBlare-wrath/
+        run: ./scripts/package.sh "${{ github.ref_name }}"
 
       - name: Create Versioned GitHub Release
         uses: softprops/action-gh-release@v2
