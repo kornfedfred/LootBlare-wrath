@@ -5,7 +5,7 @@
 ## Notes: Displays sorted item rolls in a draggable frame for streamlined master looting.
 
 ## Author: Ehawne, Sivent, Gulolio, Nikki1993, kff
-## Version: 2.0.6
+## Version: 2.0.7
 ## X-Website: https://github.com/kornfedfred/LootBlare-wrath/
 ## X-Category: Raid
 ## X-License: MIT
