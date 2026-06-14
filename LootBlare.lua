@@ -433,8 +433,7 @@ UpdateFrameLayout = function()
         itemRollFrame:SetWidth(PREVIEW_PANEL_WIDTH + DIVIDER_WIDTH + ROLL_PANEL_WIDTH)
         itemRollFrame.previewPanel:Show()
         itemRollFrame.divider:Show()
-        -- Show the whole frame when loot drops are detected
-        itemRollFrame:Show()
+        -- Don't auto-show the outer frame here; callers decide when to open it.
     else
         itemRollFrame:SetWidth(ROLL_PANEL_WIDTH)
         if itemRollFrame.previewPanel then
